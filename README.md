@@ -98,7 +98,7 @@ Pronto. Kafka, Zookeeper, PostgreSQL, simulador de transações, detector de fra
 
 **Índice parcial `WHERE lido = FALSE` no PostgreSQL:** O dashboard consulta predominantemente alertas não lidos. Um índice parcial filtra apenas essa fatia dos dados, reduzindo o tamanho do índice em >90% conforme alertas são marcados como lidos, e eliminando a necessidade de um índice full-table.
 
-**Dataclasses em vez de Pydantic para modelos:** O pipeline precisa serializar/desserializar milhares de transações por segundo. Dataclasses são ~3x mais rápidas que Pydantic v2 para `to_dict()` simples, e não precisamos de validação complexa de schema, o simulador já gera dados corretos e o Kafka já valida JSON.
+**Dataclasses em vez de Pydantic para modelos:** O pipeline precisa serializar/desserializar milhares de transações por segundo. Dataclasses são ~3x mais rápidas que Pydantic v2 para `to_dict()` simples, e não precisamos de validação complexa de schema — o simulador já gera dados corretos e o Kafka já valida JSON.
 
 **Faker com locale pt_BR:** Dados realistas brasileiros (CPFs, bancos, MCCs) tornam os testes e demonstrações mais representativos do cenário real de produção, facilitando a validação visual no dashboard.
 
