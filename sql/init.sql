@@ -4,6 +4,7 @@
 -- Extensão para UUID nativo
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
+-- TABELAS
 -- Tabela de transações recebidas via Kafka
 CREATE TABLE transacoes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -78,11 +79,10 @@ CREATE INDEX idx_transacoes_status ON transacoes (status, data_hora DESC)
 -- Índice para logs de auditoria por data
 CREATE INDEX idx_logs_auditoria_data ON logs_auditoria (created_at DESC);
 
--- FUNÇÕES UTILITÁRIAS
+-- FUNÇÕES E TRIGGERS DE AUDITORIA
 -- Função para registrar log de auditoria automaticamente
 CREATE OR REPLACE FUNCTION registrar_log_auditoria()
-RETURNS TRIGGER AS $$
-BEGIN
+RETURNS TRIGGER AS $$ BEGIN
     INSERT INTO logs_auditoria (acao, tabela_afetada, registro_id, detalhes)
     VALUES (
         TG_OP,
@@ -95,20 +95,28 @@ BEGIN
     );
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+ $$ LANGUAGE plpgsql;
 
 -- Trigger de auditoria para alertas
 CREATE TRIGGER trg_auditoria_alertas
     AFTER INSERT OR UPDATE ON alertas
-    FOR EACH ROW EXECUTE FUNCTION registrar_log_auditoria();
-
--- Trigger de auditoria para transações com status alterado
-CREATE TRIGGER trg_auditoria_transacoes
-    AFTER INSERT OR UPDATE ON transacoes
     FOR EACH ROW
-    WHEN (NEW.status IS DISTINCT FROM OLD.status OR TG_OP = 'INSERT')
     EXECUTE FUNCTION registrar_log_auditoria();
 
+-- Trigger de auditoria para transacoes: INSERT
+CREATE TRIGGER trg_auditoria_transacoes_insert
+    AFTER INSERT ON transacoes
+    FOR EACH ROW
+    EXECUTE FUNCTION registrar_log_auditoria();
+
+-- Trigger de auditoria para transacoes: UPDATE (apenas se status mudou)
+CREATE TRIGGER trg_auditoria_transacoes_update
+    AFTER UPDATE ON transacoes
+    FOR EACH ROW
+    WHEN (NEW.status IS DISTINCT FROM OLD.status)
+    EXECUTE FUNCTION registrar_log_auditoria();
+
+-- VIEWS PARA O DASHBOARD
 -- VIEW: Resumo de alertas para o dashboard
 CREATE VIEW v_resumo_alertas AS
 SELECT
