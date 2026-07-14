@@ -15,16 +15,10 @@ import sys
 import time
 import os
 
+# Configura logging estruturado ao importar o módulo
+from src.logging_config import setup_logging
 
-def setup_logging(level: str = "INFO") -> None:
-    """Configura logging formatado para o pipeline."""
-    logging.basicConfig(
-        level=getattr(logging, level.upper(), logging.INFO),
-        format=(
-            "%(asctime)s | %(levelname)-8s | %(name)-25s | %(message)s"
-        ),
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
+# setup_logging() já é chamado automaticamente ao importar logging_config
 
 
 def run_producer(args) -> None:
