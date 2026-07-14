@@ -9,6 +9,7 @@ Exibe em tempo real:
 """
 
 import logging
+import time
 from datetime import datetime
 
 import pandas as pd
@@ -254,7 +255,7 @@ def main():
         options=["critica", "alta", "media", "baixa"],
         default=["critica", "alta"],
     )
-    auto_refresh = st.sidebar.toggle("Auto-refresh (5s)", value=True)
+    auto_refresh = st.sidebar.checkbox("Auto-refresh (5s)", value=True)
 
     # Carrega dados
     try:
